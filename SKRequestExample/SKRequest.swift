@@ -35,7 +35,6 @@ public class SKRequest: NSObject {
                 }
             }
         }
-//        print(urlRequest.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!)
         let request = NSMutableURLRequest(URL: NSURL(string: urlRequest.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!)!)
         request.timeoutInterval = timeOut
         request.HTTPMethod = Method.rawValue
