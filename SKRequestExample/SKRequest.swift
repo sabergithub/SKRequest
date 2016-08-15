@@ -14,9 +14,9 @@ public class SKRequest: NSObject {
         (data: AnyObject?, res : NSURLResponse? ,error : String?) -> Void in
     }
     var task : NSURLSessionDataTask!
-
     
-    init( Url : String! , Method : RequestMode = .POST  , timeOut : NSTimeInterval = 5 ,parameters : NSDictionary? = nil, onCompletion: ((data : AnyObject? , res : NSURLResponse? ,error : String?) -> Void)?){
+    
+    init( Url : String! , Method : RequestMode = .POST  , timeOut : NSTimeInterval = 5 ,parameters : NSDictionary? = nil, headers : NSDictionary? = nil, onCompletion: ((data : AnyObject? , res : NSURLResponse? ,error : String?) -> Void)?){
         completionHandler = onCompletion!
         var urlRequest = Url
         
@@ -35,9 +35,15 @@ public class SKRequest: NSObject {
                 }
             }
         }
+        
         let request = NSMutableURLRequest(URL: NSURL(string: urlRequest.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!)!)
         request.timeoutInterval = timeOut
         request.HTTPMethod = Method.rawValue
+        if headers != nil {
+            for item in headers! {
+                request.setValue(item.value as? String, forHTTPHeaderField: (item.key as? String)!)
+            }
+        }
         
         
         
@@ -47,7 +53,7 @@ public class SKRequest: NSObject {
                 
                 dispatch_async(dispatch_get_main_queue(), {
                     self.completionHandler(nil, response, "Request failed with error: \(error!.userInfo["NSLocalizedDescription"]!)")
-
+                    
                     
                     
                     
@@ -56,10 +62,10 @@ public class SKRequest: NSObject {
             }
             
             if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {           // check for http errors
-//                print("statusCode should be 200, but is \(httpStatus.statusCode)")
+                //                print("statusCode should be 200, but is \(httpStatus.statusCode)")
                 dispatch_async(dispatch_get_main_queue(), {
                     self.completionHandler(nil, response, "statusCode should be 200, but is \(httpStatus.statusCode)")
-
+                    
                     
                     
                 })
@@ -67,14 +73,14 @@ public class SKRequest: NSObject {
             }
             
             dispatch_async(dispatch_get_main_queue(), {
-                               self.completionHandler(self.convertDataToJson(data!), response!, nil)
-
+                self.completionHandler(self.convertDataToJson(data!), response!, nil)
+                
             })
             
         }
         
         task.resume()
-
+        
         
     }
     private func convertDataToJson(data : NSData?) -> AnyObject? {
@@ -85,10 +91,10 @@ public class SKRequest: NSObject {
         }
         return nil
     }
-
     
     
-
+    
+    
     internal enum RequestMode : String{
         case POST = "POST"
         case GET = "GET"
